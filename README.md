@@ -49,4 +49,3 @@ dotnet ef database update --startup-project ../UserService
 ```
 1.4 Migration can be run automatically when application starts, 
 if you want to disable this feature, you can do it in ServiceInjector.cs file and comment RunDbMigrations method
-```
