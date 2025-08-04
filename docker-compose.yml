@@ -1,0 +1,63 @@
+services:
+  userservice:
+    build:
+      context: ./user-service/UserService
+      dockerfile: UserService/Dockerfile
+    ports:
+      - "5000:8080"  
+    image: userservice:latest
+    depends_on:
+      - postgres
+    networks:
+      - default
+
+  projectservice:
+    build:
+      context: ./project-service/ProjectService
+      dockerfile: ProjectService/Dockerfile
+    environment:
+      ASPNETCORE_ENVIRONMENT: Development
+      MONGO_CONNECTION_STRING: mongodb://mongo:27017
+      MONGO_DATABASE_NAME: projectsdb
+      USER_SERVICE_URL: http://userservice:8080
+    ports:
+      - "5100:8080"
+    image: projectservice:latest
+    depends_on:
+      - mongo
+      - userservice
+    networks:
+      - default
+  
+  mongo:
+    image: mongo:5
+    restart: always
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+
+  postgres:
+    image: postgres:16
+    container_name: postgres_userservice_db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: userservicedb
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "5430:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data/pgdata
+    restart: always
+    tty: true
+    stdin_open: true
+    networks:
+      - default
+        
+volumes:
+  pgdata:
+    driver: local
+  mongo_data:
+    driver: local
